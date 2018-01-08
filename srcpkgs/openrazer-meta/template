@@ -1,0 +1,43 @@
+# Template file for 'openrazer-meta'
+pkgname=openrazer-meta
+version=2.2.0
+revision=1
+wrksrc=openrazer-${version}
+#create_wrksrc=yes
+#only_for_archs="i686 x86_64"
+build_style=gnu-makefile
+#configure_args=""
+#make_build_args=""
+#make_install_args=""
+make_install_target="setup_dkms udev_install daemon_install python_library_install"
+#conf_files=""
+#make_dirs="/var/log/dir 0755 root root"
+hostmakedepends=""
+makedepends="python3 python3-setuptools"
+depends="openrazer-daemon openrazer-driver-dkms python-openrazer"
+short_desc="OpenRazer Meta package"
+maintainer=" <>"
+license="GPL-2"
+homepage="https://openrazer.github.io"
+distfiles="https://github.com/openrazer/openrazer/releases/download/v${version}/openrazer-${version}.tar.xz"
+checksum=9adb7e97ee79e9ab22a1312eed5343b5f9ec6522112d320dddec4e29b7ca36f4
+
+openrazer-daemon_package() {
+	depends="openrazer-driver-dkms"
+	pkg_install() {
+		vmove usr/bin
+		vmove $py3_sitelib/openrazer_daemon
+	}
+}
+openrazer-driver-dkms_package() {
+	pkg_install() {
+		vmove lib/udev
+		vmove usr/src
+	}
+}
+python-openrazer_package() {
+	depends="python3 openrazer-daemon"
+	pkg_install() {
+		vmove $py3_sitelib/openrazer
+	}
+}
