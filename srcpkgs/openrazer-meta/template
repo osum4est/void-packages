@@ -1,42 +1,45 @@
 # Template file for 'openrazer-meta'
+# Currently only supports building DKMS
+
 pkgname=openrazer-meta
 version=2.2.0
 revision=1
 wrksrc=openrazer-${version}
-#create_wrksrc=yes
-#only_for_archs="i686 x86_64"
 build_style=gnu-makefile
-#configure_args=""
-#make_build_args=""
-#make_install_args=""
 make_install_target="setup_dkms udev_install daemon_install python_library_install"
-#conf_files=""
-#make_dirs="/var/log/dir 0755 root root"
 hostmakedepends=""
-makedepends="python3 python3-setuptools"
+makedepends="python3 python3-setuptools linux-headers"
 depends="openrazer-daemon openrazer-driver-dkms python-openrazer"
-short_desc="OpenRazer Meta package"
+short_desc="Meta package for installing all required openrazer packages."
 maintainer=" <>"
 license="GPL-2"
 homepage="https://openrazer.github.io"
 distfiles="https://github.com/openrazer/openrazer/releases/download/v${version}/openrazer-${version}.tar.xz"
 checksum=9adb7e97ee79e9ab22a1312eed5343b5f9ec6522112d320dddec4e29b7ca36f4
 
+do_build() {
+    make driver
+}
 openrazer-daemon_package() {
-	depends="openrazer-driver-dkms"
+    short_desc="Userspace daemon that abstracts access to the kernel driver."
+	depends="openrazer-driver-dkms python3-setproctitle python3-pyudev python3-daemonize"
 	pkg_install() {
 		vmove usr/bin
 		vmove $py3_sitelib/openrazer_daemon
 	}
 }
 openrazer-driver-dkms_package() {
+    short_desc="Kernel driver for Razer devices (DKMS-variant)"
+    depends="dkms"
+
 	pkg_install() {
-		vmove lib/udev
+		vmove usr/lib/udev 
 		vmove usr/src
 	}
 }
 python-openrazer_package() {
-	depends="python3 openrazer-daemon"
+    short_desc="Python library for accessing the Razer daemon from Python."
+	depends="python3 python3-dbus python3-numpy python3-gobject openrazer-daemon"
 	pkg_install() {
 		vmove $py3_sitelib/openrazer
 	}
